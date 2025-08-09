@@ -1,0 +1,215 @@
+SELECT * FROM karmdb.superstore;
+SHOW Columns FROM karmdb.superstore;
+
+-- Is any null or empty values
+SELECT *
+FROM karmdb.superstore
+WHERE 
+    category IS NULL OR category = '' OR
+    city IS NULL OR city = '' OR
+    country IS NULL OR country = '' OR
+    `customer Id` IS NULL OR `customer Id` = '' OR
+    `customer Name` IS NULL OR `customer Name` = '' OR
+    discount IS NULL OR discount = '' OR
+    `order Date` IS NULL OR `order Date` = '' OR
+    `order ID` IS NULL OR `order ID` = '' OR
+    `postal code` IS NULL OR `postal code` = '' OR
+    profit IS NULL OR profit = '' OR
+    quantity IS NULL OR quantity = '' OR
+    region IS NULL OR region = '' OR
+    `row ID` IS NULL OR `row ID` = '' OR
+    sales IS NULL OR sales = '' OR
+    segment IS NULL OR segment = '' OR
+    `ship date` IS NULL OR `ship date` = '' OR
+    `ship mode` IS NULL OR `ship mode` = '' OR
+    state IS NULL OR state = '' OR
+    `sub-category` IS NULL OR `sub-category` = '';
+
+-- change data type of Order Date  and Ship date
+-- create new column for order date 
+ALTER TABLE karmdb.superstore 
+ADD COLUMN order_date_text VARCHAR (20);
+
+-- set for safe sql
+SET SQL_SAFE_UPDATES = 0;
+
+-- update new column
+UPDATE karmdb.superstore 
+SET order_date_text = DATE_FORMAT(
+    STR_TO_DATE(`Order Date`, '%m/%d/%Y'),
+    '%d/%m/%Y'
+);
+-- Check  order Date format 
+SELECT `Order Date`, order_date_text 
+FROM karmdb.superstore 
+LIMIT 10;
+
+-- Drop the Order Date column
+ALTER TABLE karmdb.superstore 
+DROP COLUMN `Order Date`;
+
+-- Rename the  column 
+ALTER TABLE karmdb.superstore 
+CHANGE COLUMN order_date_text `Order Date` VARCHAR(20);
+
+-- check ship date format
+SELECT DISTINCT `Ship Date`
+FROM karmdb.superstore
+LIMIT 20;
+
+-- Create  new column for ship date
+ALTER TABLE karmdb.superstore 
+ADD COLUMN Ship_date_clean VARCHAR (20);
+
+-- update the new column
+UPDATE karmdb.superstore 
+SET Ship_date_clean = DATE_FORMAT(
+    STR_TO_DATE(`Ship Date`, '%m/%d/%Y'),
+    '%d/%m/%Y'
+);
+
+-- Check ship date format
+SELECT `Ship Date`, ship_date_clean
+FROM karmdb.superstore 
+LIMIT 10;
+
+-- drop ship date column
+ALTER TABLE karmdb.superstore 
+DROP COLUMN `Ship Date`;
+
+-- Rename the column
+ALTER TABLE karmdb.superstore 
+CHANGE COLUMN ship_date_clean `Ship Date` VARCHAR(20);
+
+SHOW Columns FROM karmdb.superstore;
+
+-- create table sum of sales by Category
+SELECT 
+  Category, 
+  CONCAT(FORMAT(SUM(Sales) / 1000000, 2), ' M') AS Total_Sales_M
+FROM karmdb.superstore
+GROUP BY Category
+ORDER BY SUM(Sales) DESC;
+
+-- create table sum of sales by sub-Category
+SELECT 
+  `Sub-Category`, 
+  CONCAT(FORMAT(SUM(Sales)/1000000, 2), ' M') AS Total_Sales_M
+FROM karmdb.superstore
+GROUP BY `Sub-Category`
+ORDER BY SUM(Sales) DESC
+LIMIT 5;
+
+-- create table sum of sales by ship mode
+SELECT 
+  `Ship Mode`, 
+  CONCAT(FORMAT(SUM(Sales)/1000000, 2), ' M') AS Total_Sales_M
+FROM karmdb.superstore
+GROUP BY `Ship Mode`
+ORDER BY SUM(Sales) DESC;
+
+-- create table sum of sales by months in years
+SELECT
+    DATE_FORMAT(STR_TO_DATE(`Order Date`, '%d/%m/%Y'), '%Y-%m') AS `Year_Month`,
+    CONCAT(FORMAT(SUM(`Sales`) / 1000000, 2), ' M') AS `Total_Sales_M`
+FROM
+    karmdb.superstore
+GROUP BY
+    `Year_Month`
+ORDER BY
+    `Year_Month`;
+
+--create table sum of Profit  by months in years
+SELECT
+  DATE_FORMAT(STR_TO_DATE(`Order Date`, '%d/%m/%Y'), '%Y-%m') AS `Year_Month`,
+  CONCAT(FORMAT(SUM(`Profit`) / 1000, 2), ' K') AS `Total_Profit_K`
+FROM
+  karmdb.superstore
+GROUP BY
+  DATE_FORMAT(STR_TO_DATE(`Order Date`, '%d/%m/%Y'), '%Y-%m')
+ORDER BY
+  DATE_FORMAT(STR_TO_DATE(`Order Date`, '%d/%m/%Y'), '%Y-%m');
+  
+
+-- create table sum of sales by segment in percentage
+  SELECT 
+  `Segment`,
+  ROUND(SUM(`Sales`) * 100 / (SELECT SUM(`Sales`) FROM karmdb.superstore), 2) AS Sales_Percentage
+FROM 
+  karmdb.superstore
+GROUP BY 
+  `Segment`
+ORDER BY 
+  Sales_Percentage DESC;
+  
+
+-- create table  sum sales by region in percentage 
+SELECT 
+  Region,
+  ROUND(SUM(Sales) * 100 / (SELECT SUM(Sales) FROM karmdb.superstore), 2) AS Sales_Percentage
+FROM 
+  karmdb.superstore
+GROUP BY 
+  Region
+ORDER BY 
+  Sales_Percentage DESC;
+  
+
+ --create table sum of sales anf profit in states
+SELECT 
+  State,
+  ROUND(SUM(Sales), 2) AS Total_Sales,
+  ROUND(SUM(Profit), 2) AS Total_Profit
+FROM 
+  karmdb.superstore
+GROUP BY 
+  State
+ORDER BY 
+  Total_Sales DESC;
+
+-- create table sum of sales by top 10 customers
+SELECT 
+  `Customer Name`,
+  ROUND(SUM(Sales), 2) AS Total_Sales
+FROM 
+  karmdb.superstore
+GROUP BY 
+  `Customer Name`
+ORDER BY 
+  Total_Sales DESC
+LIMIT 10;
+
+-- Total  Profit 
+SELECT 
+  CASE 
+    WHEN SUM(Profit) >= 1000000 THEN CONCAT(FORMAT(SUM(Profit)/1000000, 1), ' M ₹')
+    WHEN SUM(Profit) >= 1000 THEN CONCAT(FORMAT(SUM(Profit)/1000, 1), ' K ₹')
+    ELSE CONCAT(FORMAT(SUM(Profit), 1), ' ₹')
+  END AS Total_Profit
+FROM 
+  karmdb.superstore;
+  
+  -- Total Sales 
+  SELECT 
+  CASE 
+    WHEN SUM(Sales) >= 1000000 THEN CONCAT(FORMAT(SUM(Sales)/1000000, 1), ' M ₹')
+    WHEN SUM(Sales) >= 1000 THEN CONCAT(FORMAT(SUM(Sales)/1000, 1), ' K ₹')
+    ELSE CONCAT(FORMAT(SUM(Sales), 1), ' ₹')
+  END AS Total_Sales
+FROM 
+  karmdb.superstore;
+
+-- Average days ship order
+SELECT 
+  CONCAT(ROUND(AVG(DATEDIFF(
+    STR_TO_DATE(`Ship Date`, '%d/%m/%Y'),
+    STR_TO_DATE(`Order Date`, '%d/%m/%Y')
+  )), 0), ' Days') AS Average_Shipping_Days
+FROM 
+  karmdb.superstore;
+
+-- total Quantity
+SELECT 
+  CONCAT(ROUND(SUM(Quantity) / 1000, 2), 'K') AS Total_Quantity_in_K
+FROM 
+  karmdb.superstore;
