@@ -44,5 +44,5 @@ It helps track key business metrics such as **sales**, **profit**, **top custome
 ---
 
 ## 📬 Contact
-📧 Email: [youremail@example.com](mailto:youremail@example.com)  
-💼 LinkedIn: [Your LinkedIn Profile](https://www.linkedin.com/)  
+📧 Email: [youremail@example.com](mailto:karmveergurjar01@example.com)  
+💼 LinkedIn: [Your LinkedIn Profile](www.linkedin.com/in/karmveer-gurjar01)  
