@@ -31,7 +31,7 @@ It helps track key business metrics such as **sales**, **profit**, **top custome
 ---
 
 ## 📸 Dashboard Preview
-![Dashboard Screenshot](Images/Dashboard Screensort.png)  
+![Dashboard Screenshot](Images/Dashboard.png)  
 *(Replace `images/dashboard.png` with the correct path to your screenshot in the repo)*
 
 ---
